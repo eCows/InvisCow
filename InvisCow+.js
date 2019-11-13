@@ -25,9 +25,12 @@ var TabGUI;
 var reach = 1.2;
 var speed = 21;
 var max = 2;
+var countdown = 0;
+var percent = 88;
 var hitbox = false;
 var ce = false;
 var sprint = false;
+var velocity = false;
 var waterfly = false;
 var glide = false;
 var taptp = false;
@@ -42,7 +45,6 @@ var reachaura = false;
 var behindhit = false;
 var randomtp = false;
 var forcetp = false;
-var autopot = false;
 var fly = false;
 var elytra = false;
 var gamemode = false;
@@ -57,10 +59,15 @@ var ss4 = false;
 var swap = false;
 var msg = false;
 var ternary = false;
+var ternary2 = false;
 var toggler = false;
+var toggler2 = false;
 var quad = false;
+var quad2 = false;
 var stackpots = false;
 var scaffold = false;
+var night = false;
+var spam = false;
 var namestore = "MURDERER"
 
 ctx.runOnUiThread(new Runnable(
@@ -95,10 +102,10 @@ ctx.runOnUiThread(new Runnable(
                 {
 	  if(msg == false){
       msg = true;
-	  Server.sendChat("./kit nodebuff");
+	  Server.sendChat("/kit nodebuff 1");
 	  }else{
 	  msg = false;
-	  Server.sendChat("./kit nodebuff");
+	  Server.sendChat("/kit nodebuff 1");
     }
 			}}));
             Tab.addView(HudBtn, 150, 130);
@@ -121,7 +128,12 @@ ctx.runOnUiThread(new Runnable(
 Array.prototype.getRandomElement = function() {
 	return this[Math.floor(Math.random() * this.length)];
 }
-var Utils = {        
+var Utils = {      
+            Velocity: {
+        calculateSpeed: function() {
+            return Math['sqrt'](Math['pow'](Entity['getVelX'](getPlayerEnt()), 2) + Math['pow'](Entity['getVelZ'](getPlayerEnt()), 2))
+        }
+			},
             Block: {
                  isLiquid: function(id) {
 			if(id >= 8 && id <= 11) return true;
@@ -225,7 +237,7 @@ var spli = text.split(" ");
   clientMessage("Welcome to InvisCow");
   clientMessage("use . and a number to change hitbox size");
   clientMessage("use / and a number to change CE speed");
-  clientMessage("use , and a number to change autopot");
+  clientMessage("use , and a number to change velocity");
   clientMessage("List of Commands");
   clientMessage(".hitbox");
   clientMessage(".ce");
@@ -235,6 +247,7 @@ var spli = text.split(" ");
   clientMessage(".tapjet");
   clientMessage(".glide");
   clientMessage(".hitaim");
+  clientMessage(".night");
   clientMessage(".switcher");
   clientMessage(".ss");
   clientMessage(".3switcher");
@@ -244,7 +257,6 @@ var spli = text.split(" ");
   clientMessage(".randomtp");
   clientMessage(".bow")
   clientMessage(".forcetp");
-  clientMessage(".autopot");
   clientMessage(".autoswitch");
   clientMessage(".fly");
   clientMessage(".waterfly");
@@ -275,8 +287,8 @@ var spli = text.split(" ");
  
   if(spli[0] == ",") {
   preventDefault();
-  max = spli[1];
-  clientMessage("Mod => set AutoPot trigger health to "+spli[1]);
+  percent = spli[1];
+  clientMessage("Mod => set Knockback Percent to "+spli[1]);
  }
  
   if(text == ".hitbox"){
@@ -478,7 +490,6 @@ var spli = text.split(" ");
   preventDefault();
   if(elytra == false){
   elytra = true;
-  ce = true;
   clientMessage("Mod => Elytra enabled");
   }else{
   elytra = false;
@@ -505,14 +516,16 @@ var spli = text.split(" ");
   clientMessage("Mod => ForceTP disabled");
   }}
   
-  if(text == ".autopot"){
+  if(text == ".velocity"){
   preventDefault();
-  if(autopot == false){
-  autopot = true;
-  clientMessage("Mod => AutoPot enabled");
+  if(velocity == false){
+  velocity = true;
+  ce = false;
+  ModPE.setGameSpeed(20);
+  clientMessage("Mod => Velocity enabled");
   }else{
-  autopot = false;
-  clientMessage("Mod => AutoPot disabled");
+  velocity = false;
+  clientMessage("Mod => Velocity disabled");
   }}
   
   if(text == ".gamemode"){
@@ -529,6 +542,8 @@ var spli = text.split(" ");
   preventDefault();
   if(sprint == false){
 	  sprint = true;
+	  ce = false;
+	  ModPE.setGameSpeed(20);
 	  clientMessage("Mod => AutoSprint enabled");
   for(let i = 0; i <= 255; i++) {
   Block.setFriction(i, 0.525);
@@ -582,7 +597,6 @@ Block.setFriction(266, .4);
   ss3 = false;
   ss4 = false;
   showname = true;
-  ce = true;
   switcher = false;
   clientMessage("Mod => SuperSwitcher enabled");
   }else{
@@ -597,7 +611,6 @@ Block.setFriction(266, .4);
   ss = false;
   ss4 = false;
   showname = true;
-  ce = true;
   switcher = false;
   clientMessage("Mod => TripleSwitcher enabled");
   }else{
@@ -612,7 +625,6 @@ Block.setFriction(266, .4);
   ss = false;
   ss3 = false;
   showname = true;
-  ce = true;
   switcher = false;
   clientMessage("Mod => QuadSwitcher enabled");
   }else{
@@ -624,14 +636,16 @@ Block.setFriction(266, .4);
   preventDefault();
   if(v == false){
   v = true;
+  reach = 2;
+  night = true;
   showname = true;
   switcher = true;
-  ce = true;
-  sprint = true;
+  tapjet = true;
   clientMessage("Mod => VersaiSettings enabled");
   }else{
   v = false;
-  sprint = false;
+  tapjet = false;
+  reach = 1.2;
   clientMessage("Mod => VersaiSettings disabled");
   }}
   
@@ -644,6 +658,16 @@ Block.setFriction(266, .4);
   }else{
   autoswitch = false;
   clientMessage("Mod => AutoSwitcher disabled");
+  }}
+  
+  if(text == ".night"){
+  preventDefault();
+  if(night == false){
+  night = true;
+  clientMessage("Mod => Night enabled");
+  }else{
+  night = false;
+  clientMessage("Mod => Night disabled");
   }}
   
   if(text == ".stackpots"){
@@ -692,10 +716,18 @@ Item.setHandEquipped(i, true);
   clientMessage("Mod => Scaffold disabled");
   }}
   
+  if(text == ".spam"){
+  preventDefault();
+  if(spam == false){
+  spam = true;
+  clientMessage("Mod => Spam enabled");
+  }else{
+  spam = false;
+  clientMessage("Mod => Spam disabled");
+  }}
 }
 
 function modTick(){
-
     
   if(tw == true){
   var players = Server.getAllPlayers(250);
@@ -770,8 +802,37 @@ if(sk == true){
   Level.setGameMode(1);
   }
   
+  if(velocity == true){
+	  this.tick = 0;
+
+        if (this.health > Entity.getHealth(getPlayerEnt()))
+        {
+            this.tick = 50;
+            setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt()) / 100 * percent);
+            setVelY(getPlayerEnt(), Entity.getVelY(getPlayerEnt()) / 100 * percent);
+            setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt()) / 100 * percent);
+        }
+        if (this.tick == 0)
+        {
+
+            Entity.setImmobile(getPlayerEnt(), false);
+
+        }
+
+        this.health = Entity.getHealth(getPlayerEnt());
+
+        if (this.tick != 0)
+        {
+
+            tick--;
+
+        }
+  }
+  
   if(sprint == true){
   Player.setHunger(6);
+	setVelX(getPlayerEnt(), Entity['getVelX'](getPlayerEnt()) * 1.082);
+    setVelZ(getPlayerEnt(), Entity['getVelZ'](getPlayerEnt()) * 1.082);
   }
   
   if (autoswitch == true){
@@ -785,6 +846,20 @@ if(sk == true){
   if(elytra == true){
   Player.setArmorSlot(1, 444, 0);
   }
+  
+    if(spam == true) {
+        countdown++;
+        if(countdown >= 103) {
+			if(swap == false){
+			swap = true;
+            Server.sendChat("Help Staff TP Bigfoot Is Eating my A$$ Im Dead!!!! This Server SUCKS");
+			countdown = 0;
+			}else{
+			swap = false;
+			Server.sendChat("HELP Bigfoot is Phasing in my base and using Killaura!! This Server Is Dog Sht");
+			countdown = 0;
+	}}}
+
   
   if(bow && getCarriedItem() == 261) {
   var players = Server.getAllPlayers(250);
@@ -850,24 +925,6 @@ setTile(x, y, z + 1, 9, 0);
 setVelY(getPlayerEnt(), -1);
   }
   
-if(autopot == true){
-var hearts = Entity.getHealth(getPlayerEnt());
-if(hearts <= max*2){
-let bestsword = [-1, -1];
-for (let i = 0; i < 10; i++) {
-let slot = dragon.sortPots(Player.getInventorySlot(i), Player.getInventorySlotData(i));
-if (slot > bestsword[0]) {
-bestsword[0] = slot;
-bestsword[1] = i;
-}
-if (bestsword[1] != -1){
-Player.setSelectedSlotId(bestsword[1]);
-setRot(getPlayerEnt(), getYaw(getPlayerEnt()), 90);
-}
-}
-}
-}
-  
   if(randomtp == true){
   Entity.addEffect(Player.getEntity(), MobEffect.nightVision, 255, 1, false, false);
   Entity.removeEffect(getPlayerEnt(), MobEffect.blindness);
@@ -908,6 +965,10 @@ setRot(getPlayerEnt(), getYaw(getPlayerEnt()), 90);
 		}
   }
   
+  if(night == true){
+  Level.setTime(17000);
+  }
+  
 }
 function attackHook(att, vic){
   
@@ -923,8 +984,21 @@ function attackHook(att, vic){
 var hit = Player.getName(vic);
 var name = hit.toString();
 var person = name.replace(/[^a-zA-Z ]/g, "");
-Server.sendChat("./msg "+person+" YOᑌ'ᖇE ᗩ ᑕᒪOᗯᑎ,Iᗰ ᑭᑌᒪᒪIᑎ ᑌᑭ ᗯIT TᕼE IᑎᐯISᑕOᗯ,ᕼOᒪᗪ TᕼIS █▄ & Sᑌᗷ TO EKOᗯZ");
-  }
+if (ternary2 == false) {
+        if (toggler2 == false) {
+            toggler2 = true;
+        } else {
+            toggler2 = false;
+            ternary2 = true;
+        }
+    } else {
+		if (quad2 == false) {
+			quad2 = true;
+		} else {
+			quad2 = false;
+			Server.sendChat("./tell "+person+" ﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺﷺ");
+            ternary2 = false;
+}}}
 	  
   if (ss == true){
 	  if(swap == false){
@@ -973,10 +1047,6 @@ Server.sendChat("./msg "+person+" YOᑌ'ᖇE ᗩ ᑕᒪOᗯᑎ,Iᗰ ᑭᑌᒪᒪ
   
   if (saddle == true){
   rideAnimal(att, vic);
-  }
-  
-  if (v && Utils.Player.isOnGround()) {
-		setVelY(getPlayerEnt(), 0.4);
   }
   
   if (showname == true){
